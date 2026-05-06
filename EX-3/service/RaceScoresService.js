@@ -1,6 +1,11 @@
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { Duration } from "../model/Duration.js";
 import { RaceResult } from "../model/RaceResult.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Service for managing a list of race results.
@@ -27,9 +32,11 @@ class RaceScoresService {
    * @param {string} filePath - The path to the file data should be saved.
    */
   saveToFile(filePath) {
+    const absolutePath = path.resolve(__dirname, "..", filePath);
     const data = JSON.stringify(this._raceResults, null, 2);
-    fs.writeFileSync(filePath, data, "utf8");
-    console.log(`Results saved to ${filePath}`);
+    fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
+    fs.writeFileSync(absolutePath, data, "utf8");
+    console.log(`Results saved to ${absolutePath}`);
   }
 
   /**
@@ -39,7 +46,8 @@ class RaceScoresService {
    */
   loadFromFile(filePath) {
     try {
-      const data = fs.readFileSync(filePath, "utf8");
+      const absolutePath = path.resolve(__dirname, "..", filePath);
+      const data = fs.readFileSync(absolutePath, "utf8");
       const parsed = JSON.parse(data);
 
       // Reconstruct proper RaceResult objects (JSON loses class types)
